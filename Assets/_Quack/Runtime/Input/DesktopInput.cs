@@ -130,6 +130,20 @@ namespace Quack
                 if (kb.tabKey.wasPressedThisFrame) CycleSelection(kb.shiftKey.isPressed ? -1 : 1);
                 // keyboard orbit for players who can't drag
                 float k = 60f * Time.deltaTime;
+                // W A S D: walk the view around the room (relative to where the camera looks), Shift = faster.
+                // The orbit centre is clamped inside the walls; ApplyCamera keeps the camera itself in the room too.
+                Vector2 walk = new Vector2((kb.dKey.isPressed ? 1 : 0) - (kb.aKey.isPressed ? 1 : 0), (kb.wKey.isPressed ? 1 : 0) - (kb.sKey.isPressed ? 1 : 0));
+                if (walk != Vector2.zero)
+                {
+                    UserSteered = true;
+                    var fwd = Quaternion.Euler(0, yaw, 0) * Vector3.forward; var right = Quaternion.Euler(0, yaw, 0) * Vector3.right;
+                    float speed = (kb.leftShiftKey.isPressed ? 3.2f : 1.6f) * Time.unscaledDeltaTime;
+                    var basePos = (Focus ?? Plot.transform.position) + Vector3.down * 0.06f;
+                    var target = basePos + tFocusOffset + (fwd * walk.y + right * walk.x).normalized * speed;
+                    target.x = Mathf.Clamp(target.x, -3.3f, 3.3f); target.z = Mathf.Clamp(target.z, -3.7f, 3.4f);
+                    tFocusOffset = target - basePos;
+                    focusOffset = tFocusOffset;   // move immediately (no glide lag while walking)
+                }
                 if (kb.leftArrowKey.isPressed || kb.rightArrowKey.isPressed || kb.upArrowKey.isPressed || kb.downArrowKey.isPressed) UserSteered = true;
                 if (kb.leftArrowKey.isPressed) tYaw += k;
                 if (kb.rightArrowKey.isPressed) tYaw -= k;

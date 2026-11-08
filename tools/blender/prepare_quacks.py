@@ -193,9 +193,12 @@ if opt["--face"]:
             if x1 <= x0 or y1 <= y0: continue
             patch = px[y0:y1 + 1, x0:x1 + 1, :3]
             ph = np.array([colorsys.rgb_to_hsv(*c) for c in patch.reshape(-1, 3)]).reshape(patch.shape)
-            outer = dxz[vs].mean() > er * 0.95   # ring near the glasses: only brown iris pixels, never the black rim
-            brownish = (ph[..., 1] > 0.3) & (ph[..., 0] < 0.15)
-            bad = brownish if outer else ((ph[..., 2] < 0.6) | brownish)
+            # centre (old pupil + iris): dark or brown -> white. Outside it the black glasses rim can sit inside the
+            # disc, so there only mid-tone brown iris pixels go, never near-black ones (the rim) and never greys.
+            centre = dxz[vs].mean() < er * 0.85
+            if not centre and co[vs, 2].mean() < ec[2] - er * 0.5: continue   # outer ring below the eye = the beak's nostrils
+            brownish = (ph[..., 1] > 0.35) & (ph[..., 0] < 0.15)
+            bad = ((ph[..., 2] < 0.6) | brownish) if centre else (brownish & (ph[..., 2] > 0.24) & (ph[..., 2] < 0.75))
             if bad.any():
                 patch[bad] = sclera; painted_eyes += int(bad.sum())
     if painted_eyes:

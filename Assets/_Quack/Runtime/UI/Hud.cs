@@ -453,7 +453,7 @@ namespace Quack
 
             var ctl = Page("Controls");
             ui.Text(ctl, "Mouse: click an egg to inspect it; drag the teal ring to turn the rule, the purple ring to tilt it, the teal disc to slide it.\n" +
-                         "Right-drag or arrow keys: orbit.  Scroll: zoom.  Keys 0-8: views (6 whiteboard, 7 TV, 8 rule view).\n" +
+                         "W A S D: walk around the room (Shift = faster).  Right-drag or arrow keys: look around.  Scroll: zoom.  Keys 0-8: views (6 whiteboard, 7 TV, 8 rule view).\n" +
                          "Hold V: talk to Professor Quack.  P or Esc: pause.  F11: fullscreen.\n" +
                          "VR: trigger points and drags; point at a floor pad + trigger to teleport; right stick snap-turns; hold left grip to talk; left menu button pauses.", 19);
 
