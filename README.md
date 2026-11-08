@@ -4,9 +4,9 @@
 
 Built in 24 hours at **HACK.COMS '26** (RIT).
 
-[![Trailer: Professor Quack narrates his own game (click to watch)](docs/media/trailer_preview.gif)](docs/media/ProfessorQuack_trailer.mp4)
+[![Professor Quack's Egg & AI Emporium: watch the trailer on YouTube](docs/media/01_title.jpg)](https://www.youtube.com/watch?v=9ztdTYOGfZQ)
 
-▶ **[Watch the 76-second trailer](docs/media/ProfessorQuack_trailer.mp4)**, narrated by Professor Quack (Gemini TTS) and recorded from the real game · **Play now: [professorquack.courses](https://professorquack.courses)**
+▶ **[Watch the trailer on YouTube](https://www.youtube.com/watch?v=9ztdTYOGfZQ)** (76 s, narrated by Professor Quack with Gemini TTS, recorded from the real game; [MP4 copy](docs/media/ProfessorQuack_trailer.mp4)) · **Play now: [professorquack.courses](https://professorquack.courses)**
 
 Professor Quack's egg-sorting machine breaks the night before a big shipment. You build a new sorter that **learns from labelled examples**, and along the way you meet the core ideas of machine learning hands-on, in 3D:
 
@@ -18,6 +18,8 @@ Professor Quack's egg-sorting machine breaks the night before a big shipment. Yo
 | 4 | Explore the landscape | **parameter space**: a labelled 2D slice of the loss surface |
 | 5 | Teach the machine | **gradient descent**: small, good and overshooting learning rates |
 | 6 | Test on new eggs | **held-out eggs** for both classes, then a shipment of new eggs with unsure ones sent to an inspector |
+
+![Move the rule and watch the eggs re-route](docs/media/03_sorting_rule.jpg)
 
 **Professor Quack** is an AI tutor powered by **Google Gemini**. He receives the actual game state (your parameters, the selected egg, your mistakes, loss, recent actions), asks a leading question before giving an answer, highlights what he's talking about, and walks to that part of the lab.
 
