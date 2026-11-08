@@ -306,6 +306,7 @@ namespace Quack
             state = s; plot = p; speech = q; board = mb; whiteboard = wb; desktop = d; access = a; askTutor = ask;
             mb.NextStepRequested = () => { NoteActivity(); NextStepRequested(); };
             mb.EndRequested = EndSession;
+            mb.RestartRequested = () => { NoteActivity(); RestartCurrent(); };
             s.SelectionChanged += e => { if (e != null) inspected.Add(e.Id); };
             if (Training != null) HookTraining();
             s.EditCommitted += (src, __) => { editedThisStage = true; if (src == ParamSource.Steepness) steepEdited = true; };
@@ -569,6 +570,7 @@ namespace Quack
         void Enter(int i)
         {
             index = i; completed = false; finaleShown = false;
+            if (!restarting) { startParams = state.Params.Clone(); startWidthLocked = state.WidthLocked; }   // what "Restart lesson" returns to
             var st = stages[i];
             state.Stage = st.Id;
             ApplyLayout(i, animate: true);
@@ -699,7 +701,21 @@ namespace Quack
         };
 
         /// <summary>Pause menu: start the current lesson again.</summary>
-        public void RestartCurrent() { if (index >= 0) { state.Log("restart", Current.Id); Enter(index); } }
+        /// <summary>Restart the current lesson exactly as it began: the rule's numbers, width lock, selection, camera.</summary>
+        public void RestartCurrent()
+        {
+            if (index < 0) return;
+            state.Log("restart", Current.Id);
+            state.Select(null);
+            if (startParams != null) state.SetParams(startParams.Clone(), ParamSource.Reset);
+            if (state.WidthLocked != startWidthLocked) { state.SetWidthLocked(startWidthLocked); plot.SetDepthScale(startWidthLocked ? 0 : 1); }
+            if (desktop != null) desktop.UserSteered = false;
+            restarting = true;
+            Enter(index);
+            restarting = false;
+            speech.Say(new TutorLine("Fresh start. Everything is back where this lesson began.", Emotion.Encouraging, Gesture.Nod, TutorPriority.Teaching));
+        }
+        ModelParams startParams; bool startWidthLocked, restarting;
 
         void NextStage()
         {

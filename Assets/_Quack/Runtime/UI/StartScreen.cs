@@ -26,6 +26,8 @@ namespace Quack
 
         readonly UiKit ui = new UiKit();
         Canvas canvas;
+        /// <summary>The title canvas (VR: made world-space and kept in front of the learner).</summary>
+        public Transform CanvasRoot => canvas.transform;
         RectTransform menu, map, card, logo;
         Text cardTitle, cardBody;
         Button cardStart;

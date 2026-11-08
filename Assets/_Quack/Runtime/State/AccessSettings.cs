@@ -11,7 +11,7 @@ namespace Quack
         public bool ReducedMotion;            // no bobbing, no tweened camera, no conveyor travel
         public bool LessChatter;              // suppress low-priority reactions and jokes
         public float ReadingPace = 1f;        // multiplies caption hold time
-        public bool SmoothWalk;
+        public bool SmoothWalk = true;
         public bool Fullscreen = true;
         public float VoiceSpeed = 1f;          // 0.5x - 2x: voice playback and caption hold time (faster testing / slower listening)        // desktop: fullscreen (default) or windowed               // VR: stick walking (with comfort vignette); off = teleport pads only
         public bool VoiceOn = true;           // Quack speaks aloud when voice is available; captions always shown
@@ -29,7 +29,7 @@ namespace Quack
                 s.LessChatter = PlayerPrefs.GetInt("quack.lessChatter", 0) == 1;
                 s.ReadingPace = PlayerPrefs.GetFloat("quack.readingPace", 1f);
                 s.VoiceOn = PlayerPrefs.GetInt("quack.voiceOn", 1) == 1;
-                s.SmoothWalk = PlayerPrefs.GetInt("quack.smoothWalk", 0) == 1;
+                s.SmoothWalk = PlayerPrefs.GetInt("quack.vrWalk", 1) == 1;   // VR stick walking on by default (comfort vignette); off in Settings > VR
                 s.Fullscreen = PlayerPrefs.GetInt("quack.fullscreen", 1) == 1;
                 s.VoiceSpeed = Mathf.Clamp(PlayerPrefs.GetFloat("quack.voiceSpeed", 1f), 0.5f, 2f);
             }
@@ -49,7 +49,7 @@ namespace Quack
                 PlayerPrefs.SetInt("quack.lessChatter", LessChatter ? 1 : 0);
                 PlayerPrefs.SetFloat("quack.readingPace", ReadingPace);
                 PlayerPrefs.SetInt("quack.voiceOn", VoiceOn ? 1 : 0);
-                PlayerPrefs.SetInt("quack.smoothWalk", SmoothWalk ? 1 : 0);
+                PlayerPrefs.SetInt("quack.vrWalk", SmoothWalk ? 1 : 0);
                 PlayerPrefs.SetInt("quack.fullscreen", Fullscreen ? 1 : 0);
                 PlayerPrefs.SetFloat("quack.voiceSpeed", VoiceSpeed);
                 PlayerPrefs.Save();

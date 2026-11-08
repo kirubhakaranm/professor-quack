@@ -298,13 +298,24 @@ namespace Quack
                     input.enabled = false;
                     var xr = XRRig.Build(Cam, lab.LearnerSpot.position, plotGo.transform.position, Palette.Line, Palette.Highlight);
                     xrRig = xr; stations.EnableVr();
-                    if (titleScreen != null)   // the title becomes a big floating screen in front of the learner
-                        titleScreen.MakeWorldSpace(Cam, lab.LearnerSpot.position + new Vector3(0, 1.55f, 1.6f), Quaternion.identity, 2.2f);
+                    if (titleScreen != null)   // the title floats at eye level in front of the learner (never behind the LED screen)
+                    {
+                        titleScreen.MakeWorldSpace(Cam, lab.LearnerSpot.position + new Vector3(0, 1.5f, 1.2f), Quaternion.identity, 1.6f);
+                        var tf = titleScreen.CanvasRoot.gameObject.AddComponent<LazyFollow>();
+                        tf.Head = Cam.transform; tf.Distance = 1.3f; tf.Below = 0.05f; tf.Pitch = 0; tf.Snap();
+                        titleScreen.CanvasRoot.gameObject.AddComponent<OnTopUI>();
+                    }
                     xr.Pointer = input.Pointer; xr.PlotRoot = plotGo.transform; xr.Access = Access; xr.ActivityNoted = () => { anim.NoteActivity(); Lesson.NoteActivity(); };
                     xr.TalkPressed = BeginTalk; xr.TalkReleased = EndTalk;
                     xr.PauseToggled = TogglePause;
                     // captions become a low panel in front of the learner, angled up for comfortable reading
-                    Hud.MakeWorldSpace(Cam, lab.LearnerSpot.position + new Vector3(0, 0.95f, 0.45f), Quaternion.Euler(35, 0, 0), 0.95f);
+                    Hud.MakeWorldSpace(Cam, lab.LearnerSpot.position + new Vector3(0, 1.15f, 0.6f), Quaternion.Euler(20, 0, 0), 0.95f);
+                    // captions, gear and settings follow the learner (just below eye level), so they're always reachable
+                    foreach (var (cv, dist) in new[] { (Hud.Canvas.transform, 0.75f), (Hud.Overlay.transform, 0.72f) })
+                    {
+                        var lf = cv.gameObject.AddComponent<LazyFollow>(); lf.Head = Cam.transform; lf.Distance = dist; lf.Below = 0.3f; lf.Pitch = 18f; lf.Snap();
+                        cv.gameObject.AddComponent<OnTopUI>();   // always in front of the sorting control desk
+                    }
                     foreach (var tm in FindObjectsByType<Billboard>(FindObjectsSortMode.None)) tm.Cam = null;
                     Debug.Log("QUACK_XR_READY");
                 }));

@@ -14,10 +14,10 @@ namespace Quack
     {
         readonly UiKit ui = new UiKit();
         TMPro.TMP_Text lessonLabel, title, goal, checklist, score;
-        Button action, next, skip, step, end;
+        Button action, next, skip, step, end, restart;
         TMPro.TMP_Text actionLabel, nextLabel;
         Action onAction, onNext, onSkip;
-        public Action NextStepRequested, EndRequested;
+        public Action NextStepRequested, EndRequested, RestartRequested;
         public Action<int> ViewRequested;   // kept for callers; views are on keys 0-7
         public RectTransform Root { get; private set; }
         /// <summary>For highlighting the button Professor Quack asks the learner to press.</summary>
@@ -26,6 +26,7 @@ namespace Quack
         public GameObject StepButton => step ? step.gameObject : null;
         public GameObject SkipButton => skip ? skip.gameObject : null;
         public GameObject EndButton => end ? end.gameObject : null;
+        public GameObject RestartButton => restart ? restart.gameObject : null;
         public GameObject Scoreboard => score ? score.transform.parent.gameObject : null;
 
         public static readonly Color Led = new Color(1f, 0.72f, 0.25f);       // warm amber LED text
@@ -84,6 +85,7 @@ namespace Quack
             var row2 = ui.Row(right, 8);
             skip = ui.Button(row2, "Skip lesson", () => onSkip?.Invoke(), 24);
             end = ui.Button(row2, "End lesson", () => EndRequested?.Invoke(), 24);
+            restart = ui.Button(row2, "Restart lesson", () => RestartRequested?.Invoke(), 24);   // undo everything in this lesson
             WorldPanel.EnableRayInput(Root);
             a.Changed += () => ui.ApplyScale(a.TextScale);
         }
