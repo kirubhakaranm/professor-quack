@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd9040af151a5694a95152120345c87a, type: 3}
+  m_Name: QuackPalette
+  m_EditorClassIdentifier: Quack.Runtime::Quack.QuackPalette
+  StandardEgg: {fileID: 2100000, guid: 4df4dccbd2eb1ae4fa28175acb4ee445, type: 2}
+  JumboEgg: {fileID: 2100000, guid: 89531613977d582409a19ded40d24335, type: 2}
+  Duck: {fileID: 2100000, guid: f272d437b3d664641aa2764494386b03, type: 2}
+  DuckBeak: {fileID: 2100000, guid: e22f24e3829c75c45b1480c20664884f, type: 2}
+  DuckDark: {fileID: 2100000, guid: 17451ba3c3c40bd49bc4df147697781f, type: 2}
+  Tie: {fileID: 2100000, guid: d96a4734d139d7149881950127681c2a, type: 2}
+  Navy: {fileID: 2100000, guid: d5cb87e1ebb1fe545a6f974806d9567a, type: 2}
+  Gold: {fileID: 2100000, guid: 48ae19c821d42db4fba0e6c5a07b4e35, type: 2}
+  Cream: {fileID: 2100000, guid: 62cc644669b5d4849a3ba487988c65e6, type: 2}
+  White: {fileID: 2100000, guid: 2c48795e982f8e448a04179e732c5fe8, type: 2}
+  Black: {fileID: 2100000, guid: 4da859ea154dd9e4fa00ad4c4f9c8603, type: 2}
+  Brown: {fileID: 2100000, guid: aec2f6d85a6194b46b9ea9bfff1abf35, type: 2}
+  Factory: {fileID: 2100000, guid: 91c58b50a95791d4a8e766357a670872, type: 2}
+  FactoryAccent: {fileID: 2100000, guid: 0c611dc5a7d1ee64ebf8b1135df01622, type: 2}
+  LabWall: {fileID: 2100000, guid: dec29fbcdb275924f86e16ada4f47188, type: 2}
+  Wood: {fileID: 2100000, guid: 5753f518c0fbab44c9455355a3c78421, type: 2}
+  Rug: {fileID: 2100000, guid: aaf947988b8664849b01d147f96c7bd7, type: 2}
+  Cardboard: {fileID: 2100000, guid: a15c614c9abf66147a947b3c19bdd440, type: 2}
+  LabTable: {fileID: 2100000, guid: 4df107b1639b3f94a973299aeaccf154, type: 2}
+  Line: {fileID: 2100000, guid: 7e5bddea1a4ba9b40a5e8e225d78454f, type: 2}
+  Arrow: {fileID: 2100000, guid: 2e5f4614b3ce8eb4a81f3f822bf09adc, type: 2}
+  Marker: {fileID: 2100000, guid: 9469fcdddb8be4b4c807b71cf3fd866e, type: 2}
+  Handle: {fileID: 2100000, guid: 8be37820f8e265c41add5c8e884aca36, type: 2}
+  Plane: {fileID: 2100000, guid: 8b859a170a59fe64586010bd61ae47c8, type: 2}
+  Highlight: {fileID: 2100000, guid: 5ce1bb688752d764397252f4b31a83e4, type: 2}
+  Band: {fileID: 2100000, guid: 33d1502fb70d93b4397d11555b26fc58, type: 2}
+  Surface: {fileID: 2100000, guid: 12cc841ccd4ee9c49aac0f52b1c69f54, type: 2}

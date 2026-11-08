@@ -1,0 +1,20 @@
+{
+  "name": "Quack.Runtime",
+  "rootNamespace": "Quack",
+  "references": [
+    "Quack.Core",
+    "Unity.InputSystem",
+    "UnityEngine.UI",
+    "Unity.XR.Management",
+    "Unity.TextMeshPro"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

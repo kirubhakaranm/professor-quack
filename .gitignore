@@ -1,0 +1,40 @@
+# Unity (machine-local)
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+*.csproj
+*.sln
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+.vs/
+.idea/
+# Backend
+node_modules/
+.env
+# Local helper state
+.quack-target
+.DS_Store
+*.slnx
+
+# Raw AI-generated exports (large, never committed); processed versions go to Assets/_Quack/Art
+/reference/raw/
+/*.glb
+/reference/prev_asset/wrong_prof_3d
+/backend/logs/
+
+# Character dry-runs with rejected models stay local
+/Assets/_Quack/Resources/Characters/*dryrun*
+/backend/cache/
+
+# generated character sources (large); the processed FBX + texture in Resources are committed
+reference/design_a/model/*.glb
+
+# full-size generated media stays local (small copies live in reference/concepts)
+reference/design_a/model/*.png
+reference/videos/*.mp4

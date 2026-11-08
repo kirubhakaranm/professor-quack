@@ -1,0 +1,14 @@
+{
+  "name": "prof-quack-tutor-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mediates Gemini access for the Professor Quack Unity game. Keeps the API key server-side and validates every reply.",
+  "type": "module",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.mjs",
+    "mock": "node server.mjs --mock",
+    "test": "node --test test/"
+  },
+  "engines": { "node": ">=20" }
+}
