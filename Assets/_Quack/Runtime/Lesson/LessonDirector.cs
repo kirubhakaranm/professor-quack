@@ -59,7 +59,8 @@ namespace Quack
         public Stage Current => index >= 0 && index < stages.Count ? stages[index] : null;
 
         /// <summary>Current stage goal (for the tutor).</summary>
-        public string CurrentGoal => Current?.Goal ?? "";
+        public string CurrentGoal => Plain(Current?.Goal);
+        static string Plain(string g) => g == null ? "" : System.Text.RegularExpressions.Regex.Replace(g.Replace("<pos=50%>", " | ").Replace("\n", "; "), "<.*?>", "");
 
         /// <summary>Unticked checklist steps of the current stage (for the tutor's leading questions).</summary>
         public string[] RemainingSteps()
@@ -277,7 +278,7 @@ namespace Quack
         /// <summary>(id, title, goal) of every lesson, for the start screen's lesson map.</summary>
         public IReadOnlyList<(string id, string title, string goal)> LessonList
         {
-            get { var l = new List<(string, string, string)>(); foreach (var st in stages) l.Add((st.Id, st.Title, st.Goal)); return l; }
+            get { var l = new List<(string, string, string)>(); foreach (var st in stages) l.Add((st.Id, st.Title, Plain(st.Goal))); return l; }
         }
         public int StageCount => stages.Count;
 
@@ -345,6 +346,7 @@ namespace Quack
             }
             bool showLand = (i == 3 || i == 4) && Landscape != null;
             if (Landscape) Landscape.gameObject.SetActive(showLand);
+            plot.ShowSpaceTitle = i == 3;
             // stage E: the training desk takes the console's stand (it shows the live numbers); the console returns after
             bool trainingStage = i == 4;
             if (Training) Training.Root.gameObject.SetActive(trainingStage);
@@ -420,8 +422,8 @@ namespace Quack
                 RecapTitle = "One rule for every egg",
                 RecapLines = () => new[]
                 {
-                    "score = w . x + b ;  JUMBO when score >= 0  (p >= 0.5)",
-                    "The sheet is score = 0; the arrow w is perpendicular to it",
+                    $"score  {VizUtil.M("<i>z</i> = <b><i>w</i></b>\u00B7<b><i>x</i></b> + <i>b</i>")};  JUMBO when {VizUtil.M("<i>z</i> \u2265 0")}  ({VizUtil.M("<i>p</i> \u2265 0.5")})",
+                    $"The sheet is {VizUtil.M("<i>z</i> = 0")}; the arrow {VizUtil.M("<b><i>w</i></b>")} is perpendicular to it",
                     "Tilting changes w's direction; sliding changes b",
                     $"{state.TrainResult.Correct}/150 correct vs 108/150 for the weight-only sorter",
                 },
@@ -453,22 +455,35 @@ namespace Quack
                 RecapTitle = "Probability, decision and loss",
                 RecapLines = () => new[]
                 {
-                    "p(JUMBO) = sigmoid(score); on the sheet p = 0.5",
-                    "Loss per egg = -log p(true label): confident mistakes cost the most",
+                    $"{VizUtil.M("<i>p</i>(JUMBO) = \u03C3(<i>z</i>) = 1 / (1 + <i>e</i><sup>\u2212<i>z</i></sup>)")};  on the sheet {VizUtil.M("<i>p</i> = 0.5")}",
+                    $"Loss per egg  {VizUtil.M("\u2212log <i>p</i>(true label)")}: confident mistakes cost the most",
                     "Accuracy counts mistakes; loss is smooth, so we can follow its slope",
-                    "Steepness |w| squeezes the p = 0.25 / 0.75 bands without moving the sheet",
+                    $"Steepness {VizUtil.M("\u2016<b><i>w</i></b>\u2016")} squeezes the {VizUtil.M("<i>p</i> = 0.25 / 0.75")} bands without moving the sheet",
                 },
             });
             stages.Add(new Stage
             {
                 Id = "D_landscape",
                 Title = "Explore the loss landscape",
-                Goal = "Left: feature space, one point = one egg. Right: parameter space, one point = one whole rule; height = its loss on all training eggs. It is a SLICE: w_length and b are held fixed.",
+                Goal = "<size=90%><color=#7FE0D6><b>FEATURE SPACE</b> (left)</color><pos=50%><color=#FFD27A><b>PARAMETER SPACE</b> (right)</color>\n" +
+                       "<color=#FFFFFF>1 point = 1 egg</color><pos=50%><color=#FFFFFF>1 point = 1 whole rule</color>\n" +
+                       "<color=#B8BCC6>axes = measurements</color><pos=50%><color=#B8BCC6>axes = weights;  height = loss</color>\n" +
+                       "<color=#2EC4B6>current rule = the sheet</color><pos=50%><color=#2EC4B6>current rule = the teal ball</color></size>\n ",   // trailing spacer: TMP under-measures <pos> lines in a layout group
                 IntroSpeech = "Here is a different kind of space. Each spot on this landscape is an entire sorting rule, and its height is how badly that rule does. Feature space on the left, parameter space on the right: don't mix them up.",
                 Enter = () =>
                 {
                     heldLenStart = state.Params.W[1]; heldBStart = state.Params.B; heldChanged = false;
                     desktop?.SetView(0);
+                    if (Landscape)
+                    {
+                        if (access.ReducedMotion) Landscape.FinishBuildUp();
+                        else
+                        {
+                            StartCoroutine(Landscape.BuildUp());
+                            speech.Say(new TutorLine("Watch. Every dot is one whole sorting rule, one complete sheet. Its height is how badly that rule sorts all the training eggs. Fill in enough rules, and you get a landscape.",
+                                Emotion.Curious, Gesture.PointAtPanel, TutorPriority.Teaching) { Gaze = GazeTarget.Plot });
+                        }
+                    }
                 },
                 Checklist = () =>
                 {
@@ -510,7 +525,7 @@ namespace Quack
                 RecapLines = () => new[]
                 {
                     "gradient = direction the loss rises fastest; step the other way",
-                    "w <- w - learning_rate x gradient (all four parameters at once)",
+                    $"{VizUtil.M("<b><i>w</i></b> \u2190 <b><i>w</i></b> \u2212 \u03B7 \u2207<i>L</i>")}   (\u03B7 = learning rate; all four parameters at once)",
                     "tiny rate: slow; moderate: converges; too big: overshoots or diverges",
                     "the eggs never moved - only the rule did",
                 },
@@ -540,9 +555,9 @@ namespace Quack
                     var lines = new List<string>
                     {
                         $"Unseen eggs: {t.Correct}/{t.Total} correct  (JUMBO {t.TruePos}/{t.TruePos + t.FalseNeg}, STANDARD {t.TrueNeg}/{t.TrueNeg + t.FalsePos})",
-                        $"{blue}SEQUENTIAL{end}: one egg at a time,  w\u00B7x + b,  10,000 times",
+                        $"{blue}SEQUENTIAL{end}: one egg at a time,  {VizUtil.M("<i>z</i> = <b><i>w</i></b>\u00B7<b><i>x</i></b> + <i>b</i>")},  10,000 times",
                         $"{blue}BATCH{end}: eggs = rows of a matrix X  (10,000 x 3)",
-                        $"{blue}scores = X w + b{end}: every egg in ONE operation",
+                        $"{VizUtil.M("<b><i>z</i></b> = <i>X</i> <b><i>w</i></b> + <i>b</i>")}: every egg scored in ONE operation",
                         $"Same w and b, same answers: only {red}how the work is organised{end} changes",
                         "Parallel workers help, but they are finite and moving data costs time",
                     };

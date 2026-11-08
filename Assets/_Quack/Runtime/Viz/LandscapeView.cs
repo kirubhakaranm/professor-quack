@@ -19,6 +19,7 @@ namespace Quack
         const double LossCap = 1.4;                            // objective values above this are flattened at the top
 
         GameState state;
+        Transform surfT;
         Mesh mesh;
         MeshCollider surfaceCollider;
         Transform ball, minFlag;
@@ -37,6 +38,7 @@ namespace Quack
         {
             state = s;
             var surf = new GameObject("loss surface (slice)");
+            surfT = surf.transform;
             surf.transform.SetParent(transform, false);
             mesh = new Mesh { name = "LossSlice" };
             mesh.MarkDynamic();
@@ -74,6 +76,63 @@ namespace Quack
 
             s.ParamsChanged += _ => Refresh(false);
             Refresh(true);
+        }
+
+        /// <summary>
+        /// Lesson 4 intro: parameter space is built from rules. Sample rules pop in as dots at (w_mass, w_width), each at the
+        /// height of its real loss on the training eggs; then the surface rises through them and the dots fade.
+        /// </summary>
+        public System.Collections.IEnumerator BuildUp()
+        {
+            if (slice == null || surfT == null) yield break;
+            var surfR = surfT.GetComponent<MeshRenderer>();
+            surfR.enabled = false; ball.gameObject.SetActive(false); minFlag.gameObject.SetActive(false);
+            var dots = new List<(Transform t, Renderer r)>();
+            var order = new List<(int i, int k)>();
+            for (int i = 1; i < Res; i += 4) for (int k = 1; k < Res; k += 4) order.Add((i, k));
+            var rng = new System.Random(7);
+            for (int n = order.Count - 1; n > 0; n--) { int m = rng.Next(n + 1); (order[n], order[m]) = (order[m], order[n]); }
+            var dotMat = new Material(surfR.sharedMaterial);
+            float per = 3.2f / order.Count;
+            for (int n = 0; n < order.Count; n++)
+            {
+                var (i, k) = order[n];
+                double v = slice.Values[i, k];
+                float t = Mathf.Clamp01((float)((v - slice.MinValue) / LossCap));
+                var d = GameObject.CreatePrimitive(PrimitiveType.Sphere); Destroy(d.GetComponent<Collider>());
+                d.name = "sample rule"; d.transform.SetParent(transform, false);
+                d.transform.localPosition = new Vector3(MapA(slice.ParamAt(0, i)), t * Height, MapB(slice.ParamAt(1, k)));
+                d.transform.localScale = Vector3.one * 0.014f;
+                var r = d.GetComponent<Renderer>(); r.sharedMaterial = dotMat;
+                var mpb = new MaterialPropertyBlock(); var col = Color.Lerp(new Color(0.1f, 0.65f, 0.6f), new Color(0.95f, 0.55f, 0.25f), Mathf.Sqrt(t));
+                mpb.SetColor("_BaseColor", col); mpb.SetColor("_Color", col); r.SetPropertyBlock(mpb);
+                dots.Add((d.transform, r));
+                // the first few arrive slowly so the learner can follow "one dot = one rule"
+                yield return new WaitForSeconds(n < 5 ? 0.45f : per);
+            }
+            yield return new WaitForSeconds(0.6f);
+            // the surface rises through the dots
+            surfR.enabled = true;
+            for (float a = 0; a < 1.4f; a += Time.deltaTime)
+            {
+                float k = Mathf.SmoothStep(0, 1, a / 1.4f);
+                surfT.localScale = new Vector3(1, Mathf.Max(0.001f, k), 1);
+                foreach (var (dt, _) in dots) if (dt) dt.localScale = Vector3.one * 0.014f * (1 - k * 0.8f);
+                yield return null;
+            }
+            surfT.localScale = Vector3.one;
+            foreach (var (dt, _) in dots) if (dt) Destroy(dt.gameObject);
+            minFlag.gameObject.SetActive(true);
+            Refresh(false);
+        }
+
+        /// <summary>Skip the intro (reduced motion / leaving the lesson): everything visible at once.</summary>
+        public void FinishBuildUp()
+        {
+            if (surfT == null) return;
+            foreach (Transform ch in transform) if (ch.name == "sample rule") Destroy(ch.gameObject);
+            surfT.localScale = Vector3.one; surfT.GetComponent<MeshRenderer>().enabled = true;
+            minFlag.gameObject.SetActive(true); Refresh(false);
         }
 
         static float MapA(double a) => (float)((a - MinA) / (MaxA - MinA) - 0.5) * Size;

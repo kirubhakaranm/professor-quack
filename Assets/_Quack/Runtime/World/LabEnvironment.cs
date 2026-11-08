@@ -71,7 +71,7 @@ namespace Quack
             // stands under the floating consoles so they read as physical objects
             Box(t, "training desk stand", pal.DuckDark, new Vector3(0.8f, 0.45f, -0.25f), new Vector3(0.05f, 0.9f, 0.05f));
             // the screen's bezel and the two cables it hangs from
-            Box(t, "mission screen bezel", pal.DuckDark, new Vector3(0, 1.97f, 0.40f), new Vector3(1.36f, 0.37f, 0.03f));
+            Box(t, "mission screen bezel", pal.DuckDark, new Vector3(0, 1.97f, 0.40f), new Vector3(1.36f, 0.43f, 0.03f));
             Box(t, "mission cable L", pal.DuckDark, new Vector3(-0.55f, 3.1f, 0.40f), new Vector3(0.01f, 1.9f, 0.01f));
             Box(t, "mission cable R", pal.DuckDark, new Vector3(0.55f, 3.1f, 0.40f), new Vector3(0.01f, 1.9f, 0.01f));
             return root;

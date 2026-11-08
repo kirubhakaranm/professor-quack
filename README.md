@@ -87,5 +87,5 @@ docs/          architecture, character pipeline, testing
 ## Credits and licences
 
 - Code: [MIT](LICENSE).
-- Fonts: Atkinson Hyperlegible, Cinzel / Cinzel Decorative, Patrick Hand, VT323, Nunito, all under the SIL Open Font License (licence files in `Assets/_Quack/Resources/Fonts/`).
+- Fonts: Atkinson Hyperlegible, Cinzel / Cinzel Decorative, Patrick Hand, VT323, Nunito and STIX Two (maths), all under the SIL Open Font License (licence files next to the fonts in `Assets/_Quack/Resources/`).
 - Built with Unity 6 (URP, OpenXR, TextMeshPro), Node.js, Blender and Google Gemini.

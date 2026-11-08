@@ -49,7 +49,7 @@ namespace Quack
         public void Build(AccessSettings a, Transform anchor, Camera cam)
         {
             ui.Scale = a.TextScale; ui.Tmp = true;
-            Root = WorldPanel.Create("Mission screen", anchor, cam, 1.3f, 1600, 400);   // big type: read from the rule view
+            Root = WorldPanel.Create("Mission screen", anchor, cam, 1.3f, 1600, 470);   // big type: read from the rule view
             // dark bezel + screen
             var screen = new GameObject("screen", typeof(RectTransform), typeof(Image), typeof(HorizontalLayoutGroup));
             screen.transform.SetParent(Root, false);

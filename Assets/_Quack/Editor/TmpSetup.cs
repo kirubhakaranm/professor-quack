@@ -12,7 +12,7 @@ namespace Quack.Editor
     /// </summary>
     public static class TmpSetup
     {
-        static readonly string[] Fonts = { "AtkinsonHyperlegible-Regular", "AtkinsonHyperlegible-Bold", "CinzelDecorative-Bold", "VT323", "PatrickHand" };
+        static readonly string[] Fonts = { "AtkinsonHyperlegible-Regular", "AtkinsonHyperlegible-Bold", "CinzelDecorative-Bold", "VT323", "PatrickHand", "Fonts & Materials/STIXTwoText" };
 
         public static void Ensure()
         {
@@ -29,13 +29,15 @@ namespace Quack.Editor
             }
             foreach (var name in Fonts)
             {
-                var path = $"Assets/_Quack/Resources/Fonts/{name} SDF.asset";
+                // names with a folder live elsewhere under Resources (STIX sits in "Fonts & Materials" so TMP's <font="..."> tag finds it)
+                string dir = name.Contains("/") ? "Assets/_Quack/Resources/" : "Assets/_Quack/Resources/Fonts/";
+                var path = $"{dir}{name} SDF.asset";
                 if (File.Exists(path)) continue;
-                var font = AssetDatabase.LoadAssetAtPath<Font>($"Assets/_Quack/Resources/Fonts/{name}.ttf");
+                var font = AssetDatabase.LoadAssetAtPath<Font>($"{dir}{name}.ttf");
                 if (font == null) { Debug.LogWarning("QUACK_TMP missing font " + name); continue; }
                 var fa = TMP_FontAsset.CreateFontAsset(font, 90, 9, UnityEngine.TextCore.LowLevel.GlyphRenderMode.SDFAA, 1024, 1024, AtlasPopulationMode.Dynamic, true);
                 if (fa == null) { Debug.LogWarning("QUACK_TMP could not create " + name); continue; }
-                fa.name = name + " SDF";
+                fa.name = System.IO.Path.GetFileName(name) + " SDF";
                 AssetDatabase.CreateAsset(fa, path);
                 fa.material.name = fa.name + " Material"; AssetDatabase.AddObjectToAsset(fa.material, fa);
                 foreach (var tex in fa.atlasTextures) { tex.name = fa.name + " Atlas"; AssetDatabase.AddObjectToAsset(tex, fa); }

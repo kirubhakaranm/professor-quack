@@ -383,11 +383,17 @@ namespace Quack
             TogglePause();
             var desk = FindAnyObjectByType<DesktopInput>();
             if (desk) { desk.UserSteered = true; desk.SetView(7); yield return new WaitForSecondsRealtime(2.5f); yield return Shot("tv"); desk.SetView(6); yield return new WaitForSecondsRealtime(2.5f); yield return Shot("whiteboard");
+                Lesson.ShowRecapForShots(2); yield return new WaitForSecondsRealtime(0.5f); yield return Shot("whiteboard_lesson3_maths");
                 Lesson.ShowRecapForShots(5); yield return new WaitForSecondsRealtime(0.5f); yield return Shot("whiteboard_lesson6");
                 var conv = FindAnyObjectByType<ConveyorView>();
                 if (conv) { Egg big = null; foreach (var e in State.Dataset.Train) if (e.Label == 1) { big = e; break; }
                     if (big != null) State.Select(big);
-                    desk.LookAt(conv.JumboCarton.position + Vector3.up * 0.1f, 20, 35, 0.9f, 151); yield return new WaitForSecondsRealtime(3f); yield return Shot("egg_in_carton"); } desk.SetView(0); yield return new WaitForSecondsRealtime(2.5f); yield return Shot("room_overview"); }
+                    desk.LookAt(conv.JumboCarton.position + Vector3.up * 0.1f, 20, 35, 0.9f, 151); yield return new WaitForSecondsRealtime(3f); yield return Shot("egg_in_carton"); }
+                start.OnJump?.Invoke("D_landscape"); desk.UserSteered = true; desk.SetView(0);
+                yield return new WaitForSecondsRealtime(2.4f); yield return Shot("lesson4_sample_rules");
+                yield return new WaitForSecondsRealtime(5.5f); yield return Shot("lesson4_surface");
+                var lab = FindAnyObjectByType<LabEnvironment>();
+                if (lab) { desk.LookAt(lab.MissionAnchor.position, 0, 4, 1.7f, 152); yield return new WaitForSecondsRealtime(2.5f); yield return Shot("lesson4_mission_table"); } desk.SetView(0); yield return new WaitForSecondsRealtime(2.5f); yield return Shot("room_overview"); }
             Access.ReadingPace = 1f; Access.VoiceSpeed = 2f;   // screenshot run only (not saved): get to the confetti quickly
             speech.ClearAll();
             Lesson.Finale();

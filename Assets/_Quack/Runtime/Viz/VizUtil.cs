@@ -36,6 +36,11 @@ namespace Quack
         public static TMPro.TMP_FontAsset TmpBody => tmpBody ? tmpBody : (tmpBody = Tmp("AtkinsonHyperlegible-Regular"));
         public static TMPro.TMP_FontAsset TmpRoyal => tmpRoyal ? tmpRoyal : (tmpRoyal = Tmp("CinzelDecorative-Bold"));
         public static TMPro.TMP_FontAsset TmpLcd => tmpLcd ? tmpLcd : (tmpLcd = Tmp("VT323"));
+        static TMPro.TMP_FontAsset tmpMath;
+        /// <summary>STIX Two (LaTeX-like maths face) for equations; also reachable in rich text as &lt;font="STIXTwoText SDF"&gt;.</summary>
+        public static TMPro.TMP_FontAsset TmpMath => tmpMath ? tmpMath : (tmpMath = Resources.Load<TMPro.TMP_FontAsset>("Fonts & Materials/STIXTwoText SDF"));
+        /// <summary>Wrap a formula so it renders in the maths face inside any TMP text.</summary>
+        public static string M(string formula) => TmpMath != null ? $"<font=\"STIXTwoText SDF\">{formula}</font>" : formula;
         public static TMPro.TMP_FontAsset TmpHand => tmpHand ? tmpHand : (tmpHand = Tmp("PatrickHand"));
 
         /// <summary>A 3D text label (TextMeshPro: sharp at every distance, no shimmer). size matches the old TextMesh scale.</summary>

@@ -47,8 +47,8 @@ namespace Quack
             v.childControlHeight = v.childControlWidth = true; v.childForceExpandHeight = false; v.childForceExpandWidth = true;
             var p = brt;
 
-            ui.T(p, "SORTING RULE", 24, UiKit.Accent, FontStyle.Bold);
-            Equation = ui.T(p, "", 22, UiKit.TextColor);   // filled live by EquationView
+            ui.T(p, "SORTING RULE   <size=80%><color=#B8BCC6>z = score</color></size>", 24, UiKit.Accent, FontStyle.Bold);
+            Equation = ui.T(p, "", 26, UiKit.TextColor);   // filled live by EquationView
 
             string[] names = { "mass", "length", "width" };
             for (int j = 0; j < 3; j++)

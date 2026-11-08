@@ -68,7 +68,7 @@ namespace Quack
             return hot ? $"<b><color=#{QuackPalette.Hex(Color.white)}>{num}</color></b>" : $"<color=#{QuackPalette.Hex(col)}>{num}</color>";
         }
 
-        static string Name(int k) => $"<color=#{QuackPalette.Hex(Color.Lerp(QuackPalette.FeatureColor[k], Color.white, 0.4f))}>{EggDataset.FeatureNames[k].ToLower()}</color>";
+        static string Name(int k) => $"<i><color=#{QuackPalette.Hex(Color.Lerp(QuackPalette.FeatureColor[k], Color.white, 0.4f))}>{EggDataset.FeatureNames[k].ToLower()}</color></i>";
 
         void Refresh()
         {
@@ -81,16 +81,19 @@ namespace Quack
                 Target.gameObject.SetActive(show);
                 if (show)
                 {
-                    string bTerm = (p.B >= 0 ? " + " : " - ") + Term(3, System.Math.Abs(p.B));
-                    string w3 = flat ? "" : $" + {Term(2, p.W[2])} {Name(2)}";
-                    string line1 = $"score = {Term(0, p.W[0])} {Name(0)} + {Term(1, p.W[1])} {Name(1)}{w3}{bTerm}";
+                    // typeset like LaTeX (STIX maths face): italic variables, true minus sign, centred dot
+                    if (VizUtil.TmpMath != null && Target.font != VizUtil.TmpMath) Target.font = VizUtil.TmpMath;
+                    const string minus = "\u2212", dot = "\u00B7";
+                    string bTerm = (p.B >= 0 ? " + " : $" {minus} ") + Term(3, System.Math.Abs(p.B));
+                    string w3 = flat ? "" : $" + {Term(2, p.W[2])}{dot}{Name(2)}";
+                    string line1 = $"<i>z</i> = {Term(0, p.W[0])}{dot}{Name(0)} + {Term(1, p.W[1])}{dot}{Name(1)}{w3}{bTerm}".Replace("-", minus);
                     string line2;
                     if (flat && System.Math.Abs(p.W[1]) > 1e-3)
                     {
                         double slope = -p.W[0] / p.W[1], icpt = -p.B / p.W[1];
-                        line2 = $"line:  {Name(1)} = {slope:+0.00;-0.00} {Name(0)} {(icpt >= 0 ? "+" : "-")} {System.Math.Abs(icpt):0.00}";
+                        line2 = $"line:  {Name(1)} = {slope:+0.00;-0.00}{dot}{Name(0)} {(icpt >= 0 ? "+" : "-")} {System.Math.Abs(icpt):0.00}".Replace("-", minus);
                     }
-                    else line2 = "JUMBO where score > 0;  the sheet is score = 0";
+                    else line2 = "JUMBO where <i>z</i> > 0;   the sheet is <i>z</i> = 0";
                     Target.text = $"{line1}\n<size={Mathf.RoundToInt(Target.fontSize * 0.8f)}>{line2}</size>";
                 }
             }

@@ -197,6 +197,21 @@ namespace Quack
             return tm;
         }
 
+        TMPro.TextMeshPro spaceTitle;
+        /// <summary>Lesson 4: name this space so it can't be confused with parameter space beside it.</summary>
+        public bool ShowSpaceTitle
+        {
+            set
+            {
+                if (spaceTitle == null && value)
+                {
+                    spaceTitle = VizUtil.Label("FEATURE SPACE: one point = one egg", transform, new Vector3(0, HalfExtent + 1.0f, 0), 0.42f, new Color(0.02f, 0.3f, 0.28f));
+                    spaceTitle.fontStyle = TMPro.FontStyles.Bold;
+                }
+                if (spaceTitle) spaceTitle.gameObject.SetActive(value);
+            }
+        }
+
         void BuildFrame()
         {
             float h = HalfExtent;
