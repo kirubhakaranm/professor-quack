@@ -533,8 +533,8 @@ namespace Quack
             stages.Add(new Stage
             {
                 Id = "F_test_and_scale",
-                Title = "Test and scale",
-                Goal = "Training eggs taught the rule. The dark, ringed eggs were held back: the rule has never seen them. Evaluate on them, then run the next shipment through the learned sorter.",
+                Title = "Test on new eggs",
+                Goal = "Training eggs taught the rule. The dark, ringed eggs were held back: the rule has never seen them. Evaluate on them, then let the learned sorter handle the next shipment of new eggs.",
                 IntroSpeech = "Moment of truth. These outlined eggs were locked in my office the whole time, so the machine has never seen them. If it does well on them, it learned a rule, not a list of answers.",
                 Enter = () =>
                 {
@@ -547,21 +547,18 @@ namespace Quack
                 Action = () => !evaluated ? ("Evaluate on held-out eggs", Evaluate)
                              : !shipped ? ("Run the next shipment (10,000 eggs)", RunShipment) : null,
                 Done = () => evaluated && shipped,
-                RecapTitle = "Sequential vs batch processing",
+                RecapTitle = "Unseen eggs",
                 RecapLines = () =>
                 {
                     var t = LogisticModel.Evaluate(state.Params, state.Space.Test);
-                    const string blue = "<color=#1A3A9E>", red = "<color=#B3261E>", end = "</color>";
                     var lines = new List<string>
                     {
-                        $"Unseen eggs: {t.Correct}/{t.Total} correct  (JUMBO {t.TruePos}/{t.TruePos + t.FalseNeg}, STANDARD {t.TrueNeg}/{t.TrueNeg + t.FalsePos})",
-                        $"{blue}SEQUENTIAL{end}: one egg at a time,  {VizUtil.M("<i>z</i> = <b><i>w</i></b>\u00B7<b><i>x</i></b> + <i>b</i>")},  10,000 times",
-                        $"{blue}BATCH{end}: eggs = rows of a matrix X  (10,000 x 3)",
-                        $"{VizUtil.M("<b><i>z</i></b> = <i>X</i> <b><i>w</i></b> + <i>b</i>")}: every egg scored in ONE operation",
-                        $"Same w and b, same answers: only {red}how the work is organised{end} changes",
-                        "Parallel workers help, but they are finite and moving data costs time",
+                        $"Held-out eggs: {t.Correct}/{t.Total} correct  (JUMBO {t.TruePos}/{t.TruePos + t.FalseNeg}, STANDARD {t.TrueNeg}/{t.TrueNeg + t.FalsePos})",
+                        "Training taught the rule; evaluation checks it on eggs it never saw",
+                        "Using the trained rule on new eggs (inference) never changes w or b",
                     };
-                    if (shipmentLines != null && shipmentLines.Length > 1) { lines.Add(shipmentLines[1]); if (shipmentLines.Length > 2) lines.Add(shipmentLines[2]); }
+                    if (shipmentLines != null && shipmentLines.Length > 0) lines.Add(shipmentLines[0]);
+                    lines.Add($"Unsure eggs go to an inspector: a review band, separate from the {VizUtil.M("<i>p</i> = 0.5")} decision");
                     return lines.ToArray();
                 },
             });
@@ -698,7 +695,7 @@ namespace Quack
             "Turn a score into a probability with the sigmoid",
             "Tell accuracy from loss: confident mistakes cost most",
             "Train with gradient descent and choose a sensible learning rate",
-            "Judge a model on held-out data, then run it on a whole batch",
+            "Judge a model on held-out data, then use it on new eggs",
         };
 
         /// <summary>Pause menu: start the current lesson again.</summary>
@@ -739,24 +736,15 @@ namespace Quack
             const int N = 10000;
             const double reviewBand = 0.15;   // flag eggs with 0.35 < p < 0.65 for a human; decisions still use p >= 0.5
             var shipment = ShipmentGenerator.Generate(N);
-            var sw = System.Diagnostics.Stopwatch.StartNew();
             var r = ShipmentGenerator.Classify(shipment, state.Space.Scaler, state.Space.Active, state.Params, reviewBand);
-            sw.Stop();
             shipped = true;
             lastFlagged = r.FlaggedForReview;
             state.Log("shipment", $"{r.Jumbo} jumbo, {r.Standard} standard, {r.FlaggedForReview} flagged");
-            // illustrative cost model (NOT a measurement): per-egg overhead vs per-batch overhead; finite workers + transfer cost
-            double perEggOverheadUs = 40, perEggComputeUs = 0.05, batch = 256, perBatchOverheadUs = 60, workers = 4, transferUs = 2000;
-            double oneAtATime = N * (perEggOverheadUs + perEggComputeUs) / 1000.0;
-            double batched = (Math.Ceiling(N / batch) * perBatchOverheadUs + N * perEggComputeUs) / 1000.0;
-            double parallel = transferUs / 1000.0 + batched / workers;
             shipmentLines = new[]
             {
-                $"Shipment of {N:N0}: {r.Jumbo:N0} JUMBO, {r.Standard:N0} STANDARD; {r.FlaggedForReview:N0} unsure (0.35<p<0.65) sent to an inspector",
-                $"Measured here: {sw.Elapsed.TotalMilliseconds:0.0} ms for {N:N0} eggs (one CPU thread, this C# code)",
-                $"ILLUSTRATIVE, not measured: one-at-a-time ~{oneAtATime:0} ms; batches of {batch} ~{batched:0.0} ms; {workers} workers + transfer ~{parallel:0.0} ms",
+                $"Next shipment of {N:N0}: {r.Jumbo:N0} JUMBO, {r.Standard:N0} STANDARD; {r.FlaggedForReview:N0} unsure (0.35 < p < 0.65) sent to an inspector",
             };
-            whiteboard.Show($"Next shipment: {N:N0} new eggs", shipmentLines);
+            whiteboard.Show($"Next shipment: {N:N0} new eggs", shipmentLines[0], "Same rule, same w and b: it only predicts, it does not learn here");
             speech.Say(new TutorLine($"Ten thousand eggs, sorted. {r.FlaggedForReview} were too close to call, so they go to a human inspector instead of guessing. Finally, a factory I can be proud of.",
                 Emotion.Delighted, Gesture.Celebrate, TutorPriority.Teaching) { Gaze = GazeTarget.Whiteboard, Duck = DuckBehavior.Quack });
         }

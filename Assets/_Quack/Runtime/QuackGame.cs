@@ -90,7 +90,7 @@ namespace Quack
             // generated body only when explicitly requested (until a clean Design A model is approved)
             QuacksRig rig = null;
             // the generated Design A model is the default when it is in the build; -quackStandin forces the primitive stand-in
-            var charName = ArgValue("-quackCharacter") ?? (HasArg("-quackStandin") ? null : "ProfessorQuack");
+            var charName = ArgValue("-quackCharacter") ?? (HasArg("-quackStandin") ? null : "ProfessorQuackV2");
             if (charName != null)
             {
                 rig = CharacterLoader.TryLoad(charName, Palette, out var report);
@@ -340,7 +340,7 @@ namespace Quack
                 l.type = LightType.Point; l.transform.position = pos; l.range = 10; l.intensity = intensity; l.color = new Color(1f, 0.96f, 0.9f);
             }
             QuacksRig rig = null;
-            var charName = ArgValue("-quackCharacter") ?? (HasArg("-quackStandin") ? null : "ProfessorQuack");
+            var charName = ArgValue("-quackCharacter") ?? (HasArg("-quackStandin") ? null : "ProfessorQuackV2");
             if (charName != null) { rig = CharacterLoader.TryLoad(charName, Palette, out var report); Debug.Log("QUACK_CHARACTER " + report); }
             if (rig == null) rig = QuacksRig.BuildPlaceholder(null, Palette);
             rig.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);

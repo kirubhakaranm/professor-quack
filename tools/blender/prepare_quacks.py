@@ -175,6 +175,33 @@ if opt["--face"]:
         img.pixels[:] = px.ravel().tolist(); img.update()
     print(f"QUACKS painted out baked brows: {painted} pixels")
 
+    # paint the baked pupils/irises out too (Unity adds moving eyes): inside each eye's sclera disc, dark or brown
+    # pixels -> the sclera's own white. Otherwise the old pupil peeks out beside the animated eye when the head turns.
+    sclera = np.median(col[eye], axis=0) if eye.sum() > 10 else np.array([0.93, 0.92, 0.9])
+    painted_eyes = 0
+    for tag in ("L", "R"):
+        if f"eye{tag}" not in FACE: continue
+        ec = np.array(FACE[f"eye{tag}"]); er = FACE[f"eye{tag}_r"]
+        dxz = np.linalg.norm((co - ec)[:, [0, 2]], axis=1)
+        inside = (dxz < er * 1.12) & (co[:, 1] < ec[1] + 0.04 * D)
+        for p in me.polygons:
+            vs = list(p.vertices)
+            if not inside[vs].all(): continue
+            uvs = np.array([uvl[li].uv[:] for li in p.loop_indices]) * [TW, TH]
+            x0, y0 = np.floor(uvs.min(0)).astype(int); x1, y1 = np.ceil(uvs.max(0)).astype(int)
+            x0, y0 = max(x0, 0), max(y0, 0); x1, y1 = min(x1, TW - 1), min(y1, TH - 1)
+            if x1 <= x0 or y1 <= y0: continue
+            patch = px[y0:y1 + 1, x0:x1 + 1, :3]
+            ph = np.array([colorsys.rgb_to_hsv(*c) for c in patch.reshape(-1, 3)]).reshape(patch.shape)
+            outer = dxz[vs].mean() > er * 0.95   # ring near the glasses: only brown iris pixels, never the black rim
+            brownish = (ph[..., 1] > 0.3) & (ph[..., 0] < 0.15)
+            bad = brownish if outer else ((ph[..., 2] < 0.6) | brownish)
+            if bad.any():
+                patch[bad] = sclera; painted_eyes += int(bad.sum())
+    if painted_eyes:
+        img.pixels[:] = px.ravel().tolist(); img.update()
+    print(f"QUACKS painted out baked pupils: {painted_eyes} pixels")
+
 # 3b) optional: remove the generated head (baked eyes/glasses can't animate); Unity attaches the
 #     procedural Design A head + controllable face to the head bone instead.
 if opt["--strip-head"]:

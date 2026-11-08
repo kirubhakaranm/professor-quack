@@ -9,7 +9,7 @@ namespace Quack
     /// <summary>
     /// Records a ~80 s gameplay trailer from the real game (-quackTrailer &lt;dir&gt;): a scripted run through the title, the
     /// intro video, the egg cloud, a player turning the desk dials, probability bands, parameter space, gradient descent,
-    /// the batch whiteboard and the board-meeting finale. Frames are rendered at a fixed 30 fps (Time.captureFramerate),
+    /// the unseen-eggs test and the board-meeting finale. Frames are rendered at a fixed 30 fps (Time.captureFramerate),
     /// so the result is smooth however slowly the machine renders; frames are saved as JPEGs for ffmpeg.
     /// Everything shown is the live simulation: the dial turns change the real parameters.
     /// </summary>
@@ -197,7 +197,7 @@ namespace Quack
             yield return Wait(0.8f);
 
             Debug.Log("QUACK_TRAILER segment 8) unseen eggs frame=" + frame);
-            // 8) unseen eggs and sequential vs batch
+            // 8) unseen eggs
             Start.OnJump?.Invoke("F_test_and_scale"); yield return Park(home);
             desk.UserSteered = true; desk.SetView(8);
             yield return Wait(2.0f);

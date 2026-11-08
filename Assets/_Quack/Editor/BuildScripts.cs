@@ -29,6 +29,9 @@ namespace Quack.Editor
             PlayerSettings.WebGL.dataCaching = true;
             PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.ExplicitlyThrownExceptionsOnly;
             PlayerSettings.runInBackground = true;
+            // WebGL 2 only: with WebGPU listed first, browsers that fall back to WebGL 2 drew no lit (URP) meshes at all
+            PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.WebGL, false);
+            PlayerSettings.SetGraphicsAPIs(BuildTarget.WebGL, new[] { UnityEngine.Rendering.GraphicsDeviceType.OpenGLES3 });
             Build(BuildTarget.WebGL, "Builds/WebGL");
             EditorApplication.Exit(exitCode);
         }
