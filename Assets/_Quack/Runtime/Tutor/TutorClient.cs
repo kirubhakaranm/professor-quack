@@ -51,7 +51,16 @@ namespace Quack
             if (url != null && url.Contains("tutorMock")) MockRequests = true;
             // static hosting (GitHub Pages): the tutor service lives elsewhere, e.g. ?tutor=https://tutor.example.com
             var m = url != null ? System.Text.RegularExpressions.Regex.Match(url, @"[?&]tutor=([^&#]+)") : null;
-            if (m != null && m.Success) BaseUrl = Uri.UnescapeDataString(m.Groups[1].Value).TrimEnd('/');
+            if (m != null && m.Success)
+            {
+                // only our own tutor host (or a local backend): a crafted link must not send game data elsewhere
+                var cand = Uri.UnescapeDataString(m.Groups[1].Value).TrimEnd('/');
+                if (Uri.TryCreate(cand, UriKind.Absolute, out var tu) &&
+                    ((tu.Scheme == "https" && (tu.Host == "professorquack.courses" || tu.Host.EndsWith(".professorquack.courses"))) ||
+                     (tu.Scheme == "http" && (tu.Host == "127.0.0.1" || tu.Host == "localhost"))))
+                    BaseUrl = cand;
+                else Debug.LogWarning("QUACK_TUTOR ignored tutor URL (not an allowed host): " + cand);
+            }
 #endif
         }
 

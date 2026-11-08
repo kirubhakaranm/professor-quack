@@ -34,7 +34,8 @@ const TYPES = { ".html": "text/html; charset=utf-8", ".js": "application/javascr
 /** Serve a file from the WebGL build; ".gz" files get Content-Encoding so the browser inflates them. */
 function serveStatic(urlPath, res) {
   if (!fs.existsSync(STATIC_DIR)) return false;
-  let rel = decodeURIComponent(urlPath.split("?")[0]);
+  let rel;
+  try { rel = decodeURIComponent(urlPath.split("?")[0]); } catch { return false; }   // malformed %-escapes: just a 404, never a crash
   if (rel === "/" || rel === "") rel = "/index.html";
   const file = path.resolve(STATIC_DIR, "." + rel);
   if (!file.startsWith(STATIC_DIR + path.sep) || !fs.existsSync(file) || !fs.statSync(file).isFile()) return false;
@@ -48,6 +49,18 @@ function serveStatic(urlPath, res) {
   return true;
 }
 const RATE = { perMinute: 30, hits: [] };
+// per-client limits (requests per minute) for every route that spends Gemini quota
+const CLIENT_LIMITS = { "/tutor": 20, "/tts": 40, "/transcribe": 30 };
+const clientHits = new Map();
+function clientLimited(route, ip) {
+  const limit = CLIENT_LIMITS[route]; if (!limit) return false;
+  const now = Date.now(), k = route + "|" + ip;
+  const hits = (clientHits.get(k) || []).filter((t) => now - t < 60000);
+  if (hits.length >= limit) { clientHits.set(k, hits); return true; }
+  hits.push(now); clientHits.set(k, hits);
+  if (clientHits.size > 5000) clientHits.clear();   // bounded memory
+  return false;
+}
 // Test hooks for the browser build (off unless TEST_SHOTS=1): the game uploads CANVAS screenshots and tour
 // progress lines, because a browser game can't write files or expose its log.
 const TEST_SHOTS = process.env.TEST_SHOTS === "1";
@@ -171,6 +184,14 @@ export function createServer({ mock = MOCK, ask = askGemini } = {}) {
       return send(res, 200, { ok: true, mode: mock ? "mock" : "gemini", model: mock ? null : MODEL }, origin);
     }
     if (req.method === "GET" && serveStatic(urlPath, res)) return;
+    if (req.method === "POST") {
+      // 2) JSON only: a cross-site "simple" POST (text/plain, form) is refused, so other websites can't spend the quota
+      //    (application/json forces a CORS preflight, which only ALLOWED_ORIGINS pass). Test hooks send raw bytes.
+      const ct = String(req.headers["content-type"] || "").toLowerCase();
+      const isTestHook = urlPath === "/test-shot" || urlPath === "/test-log";
+      if (!isTestHook && !ct.startsWith("application/json")) return send(res, 415, { error: "application/json required" }, origin);
+      if (clientLimited(urlPath, req.socket.remoteAddress || "?")) return send(res, 429, { error: "slow down" }, origin);
+    }
     // ---- live transcript while the learner holds to talk: POST /transcribe {audio} -> {text} ----
     if (req.method === "POST" && urlPath === "/transcribe") {
       let raw = "";
