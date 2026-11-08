@@ -46,6 +46,7 @@ namespace Quack
             finale = holder.AddComponent<VideoPlayer>();
             finale.source = VideoSource.Url; finale.url = path; finale.isLooping = false; finale.playOnAwake = false;
             finale.renderMode = VideoRenderMode.APIOnly; finale.skipOnDrop = true;
+            if (TrailerDirector.Active) { finale.timeUpdateMode = VideoTimeUpdateMode.GameTime; finale.skipOnDrop = false; }
             finale.audioOutputMode = VideoAudioOutputMode.Direct;   // the clip's own cheering; muted when voice is off
             finale.errorReceived += (vp, msg) => Debug.LogWarning("QUACK_FINALE error: " + msg);
             finale.Prepare();
@@ -112,6 +113,7 @@ namespace Quack
                 player.renderMode = VideoRenderMode.APIOnly;
                 player.prepareCompleted += p => { videoImage.texture = p.texture; HasVideo = true; videoImage.enabled = false; };
                 player.skipOnDrop = true; player.playOnAwake = false;
+                if (TrailerDirector.Active) { player.timeUpdateMode = VideoTimeUpdateMode.GameTime; player.skipOnDrop = false; }   // fixed-fps trailer capture
                 player.Prepare();
             }
             a.Changed += () => ui.ApplyScale(a.TextScale);

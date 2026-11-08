@@ -113,6 +113,7 @@ namespace Quack
         static void CopyRig(QuacksRig a, QuacksRig b)
         {
             b.Body = a.Body; b.Head = a.Head; b.Jaw = a.Jaw; b.LidL = a.LidL; b.LidR = a.LidR; b.WingL = a.WingL; b.WingR = a.WingR; b.Tie = a.Tie;
+            b.FootL = a.FootL; b.FootR = a.FootR; b.Tail = a.Tail;
             b.EyeL = a.EyeL; b.EyeR = a.EyeR; b.BrowL = a.BrowL; b.BrowR = a.BrowR; b.Glasses = a.Glasses;
             b.LidOpenL = a.LidOpenL; b.LidOpenR = a.LidOpenR; b.BrowBaseL = a.BrowBaseL; b.BrowBaseR = a.BrowBaseR;
             b.WingRestL = a.WingRestL; b.WingRestR = a.WingRestR; b.JawOpenDegrees = a.JawOpenDegrees; b.BrowTravel = a.BrowTravel; b.WingZSign = a.WingZSign;
@@ -153,6 +154,7 @@ namespace Quack
             // lands on Unity's -X after the FBX axis flip, so map by Unity side: the bone on +X drives WingL
             rig.WingL = Find("wing_R") ?? new GameObject("wing_L (missing)").transform;
             rig.WingR = Find("wing_L") ?? new GameObject("wing_R (missing)").transform;
+            rig.FootL = Find("foot_R"); rig.FootR = Find("foot_L"); rig.Tail = Find("tail");   // same side mapping as the wings
             rig.Tie = new GameObject("tie (baked into mesh)").transform;
             rig.Tie.SetParent(rig.Body, false);
             rig.WingRestL = (go.transform.rotation * new Vector3(0.18f, -1f, 0)).normalized;    // WingL is the +X wing (see above)
@@ -194,7 +196,7 @@ namespace Quack
             CopyRig(rig, wrapped);
             Object.Destroy(rig);
             rig = wrapped;
-            report = $"loaded {resourceName}: texture={(tex != null)} fullHead={fullHead} height={h:0.00} bones body={rig.Body.name} head={head.name} jaw={(rig.Jaw != null)} wings={(Find("wing_L") != null)}/{(Find("wing_R") != null)}";
+            report = $"loaded {resourceName}: texture={(tex != null)} fullHead={fullHead} height={h:0.00} bones body={rig.Body.name} head={head.name} jaw={(rig.Jaw != null)} wings={(Find("wing_L") != null)}/{(Find("wing_R") != null)} feet={(rig.FootL != null)}/{(rig.FootR != null)} tail={(rig.Tail != null)}";
             return rig;
         }
     }

@@ -13,6 +13,8 @@ namespace Quack
     public sealed class QuacksRig : MonoBehaviour
     {
         public Transform Body, Head, Jaw, LidL, LidR, WingL, WingR, Tie;
+        /// <summary>Option A rigid parts (generated V2 rig); null on older rigs.</summary>
+        public Transform FootL, FootR, Tail;
         public Transform EyeL, EyeR, BrowL, BrowR, Glasses;
         public Vector3 LidOpenL, LidOpenR, BrowBaseL, BrowBaseR;
         /// <summary>Bone rigs: world-space rest direction of each wing (shoulder -> tip), for pointing.</summary>

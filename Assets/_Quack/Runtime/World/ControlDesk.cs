@@ -16,6 +16,8 @@ namespace Quack
     {
         public GameState State;
         public Transform ScreenAnchor { get; private set; }
+        /// <summary>The knob of dial k (0-2: weights), or the lever grip (3): for the trailer's on-screen cursor.</summary>
+        public Transform ControlAt(int k) => k < 3 ? dials[k].transform : lever.transform;
         public bool ShowSteepness { get => steepRoot && steepRoot.gameObject.activeSelf; set { if (steepRoot) steepRoot.gameObject.SetActive(value); } }
         Transform plate, steepRoot;
         readonly Dial[] dials = new Dial[3];

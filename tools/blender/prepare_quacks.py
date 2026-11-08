@@ -202,6 +202,24 @@ else: bone("jaw", P("jaw"), P("jaw_tip"), "head")
 if "tie" in FACE: bone("tie", Vector(FACE["tie"]), Vector(FACE["tie"]) + Vector((0, -0.05, 0)), "body")
 bone("wing_L", P("wing_L"), P("wing_L_tip"), "body")
 bone("wing_R", P("wing_R"), P("wing_R_tip"), "body")
+# Option A: rigid feet and a tail, found from the mesh itself (feet = lowest slab, tail = back-most tuft).
+#   Feet pivot at the ankle so a step lifts the whole webbed foot; the tail pivots where it meets the body.
+_co = np.array([v.co[:] for v in body.data.vertices])
+_lsign = 1.0 if P("wing_L").x > 0 else -1.0
+FEET = {}
+for nm, sg in (("foot_L", _lsign), ("foot_R", -_lsign)):
+    m = (_co[:, 2] < 0.07 * H) & (np.sign(_co[:, 0]) == sg)
+    if m.sum() > 30:
+        fx, fy = float(np.median(_co[m, 0])), float(np.median(_co[m, 1]))
+        FEET[nm] = (fx, fy)
+        bone(nm, Vector((fx, fy + 0.02 * D, 0.075 * H)), Vector((fx, fy - 0.10 * D, 0.02 * H)), "root")
+_ymin = _co[:, 1].min()
+_tm = (_co[:, 1] > _ymin + 0.86 * D) & (_co[:, 2] > 0.18 * H) & (_co[:, 2] < 0.6 * H) & (np.abs(_co[:, 0]) < 0.3 * W)
+TAIL = None
+if _tm.sum() > 30:
+    c = _co[_tm].mean(axis=0); TAIL = (float(c[1]), float(c[2]))
+    bone("tail", Vector((0, c[1] - 0.06 * D, c[2] - 0.02 * H)), Vector((0, c[1] + 0.06 * D, c[2] + 0.04 * H)), "body")
+print("QUACKS option A: feet", {k: tuple(round(x, 3) for x in v) for k, v in FEET.items()}, "tail", TAIL)
 bpy.ops.object.mode_set(mode='OBJECT')
 for k in ("neck", "jaw", "wing_L", "wing_R"): print(f"QUACKS joint {k}: {tuple(round(c, 3) for c in P(k))}")
 
@@ -234,6 +252,20 @@ for v in body.data.vertices:
     else: beak = 1.0 if (y < jaw.y and jaw_tip.z - 0.06 * H < z < jaw.z) else 0.0
     if masks and masks["tie"][v.index]:
         vg["tie"].add([v.index], 1.0, 'REPLACE'); counts["tie"] = counts.get("tie", 0) + 1; continue
+    # Option A rigid parts: feet (lowest slab, near each foot) and the back tuft move as solid pieces
+    fname = ("foot_L" if np.sign(x) == _lsign else "foot_R")
+    if fname in FEET and z < 0.11 * H and abs(x - FEET[fname][0]) < 0.22 * W:
+        fw = 1.0 - smooth(0.065 * H, 0.105 * H, z)
+        if fw > 0:
+            vg[fname].add([v.index], fw, 'REPLACE'); counts[fname] += 1
+            if fw < 0.999: vg["body"].add([v.index], 1.0 - fw, 'REPLACE'); counts["body"] += 1
+            continue
+    if TAIL is not None and y > _ymin + 0.80 * D and 0.15 * H < z < 0.65 * H and abs(x) < 0.32 * W:
+        tw = smooth(_ymin + 0.80 * D, _ymin + 0.88 * D, y)
+        if tw > 0:
+            vg["tail"].add([v.index], tw, 'REPLACE'); counts["tail"] += 1
+            if tw < 0.999: vg["body"].add([v.index], 1.0 - tw, 'REPLACE'); counts["body"] += 1
+            continue
     side = smooth(sh_x * 0.85, sh_x * 1.0, abs(x)) * smooth(tip_z - 0.12 * H, tip_z - 0.02 * H, z) * (1 - smooth(sh_z, sh_z + 0.06 * H, z))
     if beak >= 0.999: w["jaw"] = 1.0
     elif beak > 0:
@@ -267,7 +299,7 @@ def render(path, pose):
         sc.render.filepath = f"{path}_{tag}.png"; bpy.ops.render.render(write_still=True)
 if opt["--preview"]:
     render(opt["--preview"] + "_rest", [])
-    render(opt["--preview"] + "_pose", [("jaw", 25, 0, 0), ("wing_L", 0, -50, 0), ("wing_R", 0, 50, 0), ("head", 0, 15, 0)] + ([("tie", 0, 30, 0)] if "tie" in arm.pose.bones else []))
+    render(opt["--preview"] + "_pose", [("jaw", 25, 0, 0), ("wing_L", 0, -50, 0), ("wing_R", 0, 50, 0), ("head", 0, 15, 0)] + [(b, 30, 0, 0) for b in ("foot_L", "tail") if b in arm.pose.bones] + ([("tie", 0, 30, 0)] if "tie" in arm.pose.bones else []))
     for pb in arm.pose.bones: pb.rotation_euler = (0, 0, 0)
 
 # 6b) write the base-colour texture next to the FBX (<name>_basecolor.png): the Unity loader builds its

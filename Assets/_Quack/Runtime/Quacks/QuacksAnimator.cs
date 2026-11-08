@@ -49,6 +49,8 @@ namespace Quack
             return Quaternion.Inverse(p) * (r * d * Quaternion.Inverse(r)) * p;
         }
         Vector3 bodyBase;
+        // Option A: stepping feet and a wagging tail (only on rigs that have them)
+        Quaternion footLRot, footRRot, tailBase; Vector3 footLPos, footRPos, lastPos; float walk;
         float tilt, pitch, lidOpen = 1f, wingLift;
         Vector3 wingLExtra, wingRExtra, headExtra;
         float nextBlink, blinkT = -1;
@@ -62,11 +64,41 @@ namespace Quack
             tieBase = Rig.Tie.localRotation; bodyBase = Rig.Body.localPosition;
             jawBase = Rig.Jaw != null ? Rig.Jaw.localRotation : Quaternion.identity;
             restDirL = RestDir(Rig.WingL); restDirR = RestDir(Rig.WingR);
+            if (Rig.FootL) { footLRot = Rig.FootL.localRotation; footLPos = Rig.FootL.localPosition; }
+            if (Rig.FootR) { footRRot = Rig.FootR.localRotation; footRPos = Rig.FootR.localPosition; }
+            if (Rig.Tail) tailBase = Rig.Tail.localRotation;
+            lastPos = transform.position;
             nextBlink = Time.time + UnityEngine.Random.Range(2f, 5f);
             lastActivity = Time.time;
         }
 
         public void NoteActivity() => lastActivity = Time.time;
+
+        /// <summary>
+        /// Walking is detected from how fast the character moves (Stations waddles him around): each foot lifts and swings
+        /// in turn, in time with the body's side-to-side roll (sin 9t); the tail wags with the steps, gently when idle,
+        /// and happily when delighted. Reduced motion: feet stay planted, tail still.
+        /// </summary>
+        void FeetAndTail(float dt, bool still)
+        {
+            float speed = dt > 0 ? (transform.position - lastPos).magnitude / dt : 0; lastPos = transform.position;
+            walk = Mathf.Lerp(walk, speed > 0.15f && !still ? 1f : 0f, 1 - Mathf.Exp(-dt * 10));
+            float s = Mathf.Sin(Time.time * 9f);
+            void Step(Transform f, Quaternion rot, Vector3 pos, float lift)
+            {
+                if (!f) return;
+                f.localPosition = pos + (f.parent ? f.parent.InverseTransformVector(Vector3.up * 0.05f * lift) : Vector3.zero);
+                f.localRotation = Delta(f, Quaternion.Euler(-28f * lift, 0, 0)) * rot;
+            }
+            Step(Rig.FootL, footLRot, footLPos, walk * Mathf.Max(0, s));
+            Step(Rig.FootR, footRRot, footRPos, walk * Mathf.Max(0, -s));
+            if (Rig.Tail)
+            {
+                bool happy = Emotion == Emotion.Delighted || Emotion == Emotion.Excited || Emotion == Emotion.Laughing;
+                float wag = still ? 0f : Mathf.Lerp(Mathf.Sin(Time.time * (happy ? 7f : 2.2f)) * (happy ? 16f : 6f), Mathf.Sin(Time.time * 9f) * 14f, walk);
+                Rig.Tail.localRotation = Delta(Rig.Tail, Quaternion.Euler(0, wag, 0)) * tailBase;
+            }
+        }
 
         public void SetEmotion(Emotion e) => Emotion = e;
 
@@ -186,6 +218,7 @@ namespace Quack
             float targetJaw = amplitude != null ? Mathf.Clamp01(amplitude()) : 0f;
             jaw = Mathf.SmoothDamp(jaw, targetJaw, ref jawVel, targetJaw > jaw ? 0.03f : 0.07f);
             Rig.Jaw.localRotation = Delta(Rig.Jaw, Quaternion.Euler(jaw * Rig.JawOpenDegrees, 0, 0)) * jawBase;
+            FeetAndTail(dt, still);
 
             // idle bob + breathing, disabled for reduced motion; hop/step offsets from gestures
             float breath = Mathf.Sin(Time.time * 2.1f);

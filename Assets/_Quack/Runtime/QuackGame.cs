@@ -276,6 +276,8 @@ namespace Quack
                     Lesson.Begin(id);
                 };
                 start.Show();
+                var trailer = ArgValue("-quackTrailer");
+                if (trailer != null) { var td = gameObject.AddComponent<TrailerDirector>(); td.Game = this; td.Start = start; td.Dir = trailer; td.Run(); }
                 var uiShots = ArgValue("-quackUiShots");
                 if (uiShots != null) StartCoroutine(UiShots(uiShots, start));
                 var introShots = ArgValue("-quackIntroShots");

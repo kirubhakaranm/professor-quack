@@ -89,6 +89,25 @@ namespace Quack
             Anim.Play(Gesture.Shrug); yield return new WaitForSeconds(0.35f); yield return Shot("body_shrug");
             yield return new WaitForSeconds(1.2f);
             Frame(0, 1.1f); Anim.Play(Gesture.TieAdjust); yield return new WaitForSeconds(0.2f); yield return Shot("tie_adjust");
+            // Option A: a real waddle (feet step in turn) and the tail wag, filmed side-on while he walks past
+            {
+                var t = Anim.Rig.transform; var start = t.position; var startRot = t.rotation; var walkDir = t.right;
+                int taken = 0; float nextShot = 0.5f;
+                for (float w = 0; w < 1.9f; w += Time.deltaTime)
+                {
+                    t.position = start + walkDir * (0.9f * w);
+                    t.rotation = Quaternion.Euler(0, Quaternion.LookRotation(walkDir).eulerAngles.y, Mathf.Sin(Time.time * 9f) * 7f);
+                    var focus = t.position + Vector3.up * 0.6f;
+                    Cam.transform.position = focus - Vector3.Cross(walkDir, Vector3.up) * -2.4f + Vector3.up * 0.2f;
+                    Cam.transform.LookAt(focus);
+                    if (w >= nextShot && taken < 3) { yield return Shot("walk_step_" + (++taken)); nextShot += 0.17f; }
+                    yield return null;
+                }
+                t.position = start; t.rotation = startRot;
+                Anim.SetEmotion(Emotion.Delighted);
+                FrameBody(150, 2.6f); yield return new WaitForSeconds(0.9f); yield return Shot("tail_wag_delighted");
+                Anim.SetEmotion(Emotion.Neutral);
+            }
             Debug.Log($"QUACK_PORTRAIT DONE shots={n}");
             yield return new WaitForSeconds(1.5f);
             Application.Quit(0);

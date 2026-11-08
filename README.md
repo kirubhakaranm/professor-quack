@@ -17,6 +17,16 @@ Professor Quack's egg-sorting machine breaks the night before a big shipment. Yo
 
 **Professor Quack** is an AI tutor powered by **Google Gemini**. He receives the actual game state (your parameters, the selected egg, your mistakes, loss, recent actions), asks a leading question before giving an answer, highlights what he's talking about, and walks to that part of the lab.
 
+## Play
+
+| Where | How |
+|---|---|
+| **Browser** | **[professorquack.courses](https://professorquack.courses)**: no install (desktop Chrome, Edge or Firefox). Uses the built-in offline tutor unless a tutor service is linked with `?tutor=<url>`. |
+| **Windows** | Download `ProfessorQuack-Windows.zip` from [Releases](../../releases), unzip, run **Play.bat** (with the live Gemini tutor if `backend/` is running). |
+| **VR (Meta Quest 3)** | Same Windows download: connect the headset with **Quest Link**, set Link as the OpenXR runtime, run **Play VR.bat**. |
+
+Trailer: [ProfessorQuack_trailer.mp4](../../releases) (76 s, recorded from the game).
+
 ## Accessibility first
 
 Every essential task works **with the sound off and without voice input**:

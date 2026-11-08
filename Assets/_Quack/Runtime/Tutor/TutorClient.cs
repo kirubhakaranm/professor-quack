@@ -49,6 +49,9 @@ namespace Quack
                 BaseUrl = u.GetLeftPart(UriPartial.Authority);
             }
             if (url != null && url.Contains("tutorMock")) MockRequests = true;
+            // static hosting (GitHub Pages): the tutor service lives elsewhere, e.g. ?tutor=https://tutor.example.com
+            var m = url != null ? System.Text.RegularExpressions.Regex.Match(url, @"[?&]tutor=([^&#]+)") : null;
+            if (m != null && m.Success) BaseUrl = Uri.UnescapeDataString(m.Groups[1].Value).TrimEnd('/');
 #endif
         }
 
